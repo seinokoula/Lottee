@@ -1,37 +1,57 @@
-import { ethers } from 'ethers';
-import { useEffect, useState } from 'react';
+
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
 import lotteryAbi from '@/app/contract/Lottery.json';
 
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-const lotteryAddress = '0x710A6c921BB3053bA5dB4be8220ECf7D0Bb37BC6';
-const lotteryContract = new ethers.Contract(lotteryAddress, lotteryAbi, signer);
+const LotteryApp = () => {
+    const [web3, setWeb3] = useState<Web3 | null>(null);
+    const [account, setAccount] = useState<string | null>(null);
+    const [lotteryContract, setLotteryContract] = useState<any>(null);
 
-export default function Lottery() {
-  const [manager, setManager] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [balance, setBalance] = useState('');
+    useEffect(() => {
+        const init = async () => {
+            const provider = await detectEthereumProvider();
+            if (provider) {
+                const web3Instance = new Web3(provider as any);
+                setWeb3(web3Instance);
 
-  useEffect(() => {
-    async function fetchData() {
-      const manager = await lotteryContract.manager();
-      setManager(manager);
+                const accounts = await web3Instance.eth.requestAccounts();
+                setAccount(accounts[0]);
 
-      const players = await lotteryContract.getPlayers();
-      setPlayers(players);
+                const contractAddress = '0x710A6c921BB3053bA5dB4be8220ECf7D0Bb37BC6';
+                
+                const lotteryContractInstance = new web3Instance.eth.Contract(lotteryAbi, contractAddress);
+                setLotteryContract(lotteryContractInstance);
+            } else {
+                console.error('MetaMask not detected');
+            }
+        };
+        init();
+    }, []);
 
-      const balance = await provider.getBalance(lotteryContract.address);
-      setBalance(ethers.utils.formatEther(balance));
-    }
+    const enterLottery = async () => {
+        if (lotteryContract && account && web3) {
+            await lotteryContract.methods.enter().send({ from: account, value: web3.utils.toWei('0.01', 'ether') });
+        }
+    };
 
-    fetchData();
-  }, []);
+    const pickWinner = async () => {
+        if (lotteryContract && account) {
+            await lotteryContract.methods.pickWinner().send({ from: account });
+        }
+    };
 
-  return (
-    <div>
-      <h2>Lottery Contract</h2>
-      <p>This contract is managed by {manager}.</p>
-      <p>There are currently {players.length} people entered, competing to win {balance}</p>
-    </div>
-  );
-}
+    return (
+        <div>
+            <h1>Lottery App</h1>
+            {account ? <p>Connected Account: {account}</p> : <p>Please connect MetaMask</p>}
+            <button onClick={enterLottery}>Enter Lottery</button>
+            <button onClick={pickWinner}>Pick Winner</button>
+        </div>
+    );
+};
+
+export default LotteryApp;
