@@ -1,8 +1,13 @@
+import Lottery from './components/contract';
+
 
 export default function Home() {
   return (
-    <p className="text-blue-500">
-      heloo
-    </p>
+    <>
+      <p>
+        Test
+      </p>
+      <Lottery />
+    </>
   );
 }
