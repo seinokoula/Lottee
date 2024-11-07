@@ -45,7 +45,13 @@ const LotteryApp = () => {
     const enterLottery = async () => {
         if (lotteryContract && account && web3) {
             try {
-                await lotteryContract.methods.enter().send({ from: account, value: web3.utils.toWei('0.01', 'ether') });
+                await lotteryContract.methods.enter().send({
+                    from: account,
+                    value: web3.utils.toWei('0.01', 'ether'),
+                    gas: 3000000,
+                    gasPrice: web3 ? web3.utils.toWei('50', 'gwei') : '50000000000'
+                });
+                console.log('Successfully entered the lottery');
             } catch (error) {
                 console.error('Error entering lottery:', error);
             }
@@ -55,7 +61,12 @@ const LotteryApp = () => {
     const pickWinner = async () => {
         if (lotteryContract && account) {
             try {
-                await lotteryContract.methods.pickWinner().send({ from: account });
+                await lotteryContract.methods.pickWinner().send({
+                    from: account,
+                    gas: 3000000,
+                    gasPrice: web3 ? web3.utils.toWei('50', 'gwei') : '50000000000'
+                });
+                console.log('Winner picked successfully');
             } catch (error) {
                 console.error('Error picking winner:', error);
             }
