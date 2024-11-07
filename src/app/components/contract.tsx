@@ -10,6 +10,7 @@ const LotteryApp = () => {
     const [web3, setWeb3] = useState<Web3 | null>(null);
     const [account, setAccount] = useState<string | null>(null);
     const [lotteryContract, setLotteryContract] = useState<any>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const init = async () => {
@@ -52,8 +53,10 @@ const LotteryApp = () => {
                     gasPrice: web3 ? web3.utils.toWei('50', 'gwei') : '50000000000'
                 });
                 console.log('Successfully entered the lottery');
+                setMessage('You have successfully entered the lottery!');
             } catch (error) {
                 console.error('Error entering lottery:', error);
+                setMessage('Failed to enter the lottery. Please try again.');
             }
         }
     };
@@ -67,8 +70,10 @@ const LotteryApp = () => {
                     gasPrice: web3 ? web3.utils.toWei('50', 'gwei') : '50000000000'
                 });
                 console.log('Winner picked successfully');
+                setMessage('The winner has been picked!');
             } catch (error) {
                 console.error('Error picking winner:', error);
+                setMessage('Failed to pick a winner. Please try again.');
             }
         }
     };
@@ -100,6 +105,9 @@ const LotteryApp = () => {
             >
                 Pick Winner
             </button>
+            {message && (
+                <p className="mt-4 text-lg text-center text-blue-500">{message}</p>
+            )}
         </div>
     );
 };
